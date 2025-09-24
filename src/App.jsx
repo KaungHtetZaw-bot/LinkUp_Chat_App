@@ -1,84 +1,129 @@
-
-import { PinIcon, SearchIcon } from 'lucide-react'
 import './App.css'
 import SideBar from './components/SideBar'
+import ChatListsSection from './components/ChatListsSection'
+import { Ellipsis, Paperclip, Phone, Search, SendHorizontal, Smile, UserRoundSearch, Video } from 'lucide-react'
+import { sendEmailVerification } from 'firebase/auth'
 
-export const userChats = [
-  {
-    id: "1",
-    name: "Alice Tanaka",
-    avatar: "",
-    lastMessage: "Hey, are you coming to the meeting?",
-    time: "10:24 AM",
-    from:"Alice Tanaka",
-    unread: 2,
-    pin: true,
-  },
-  {
-    id: "2",
-    name: "Hiroshi Sato",
-    avatar: "",
-    lastMessage: "Yes, I sent you the files 📂",
-    time: "09:10 AM",
-    from:"Hiroshi Sato",
-    unread: 0,
-    pin: true,
-  },
-  {
-    id: "3",
-    name: "Emily Chen",
-    avatar: "",
-    lastMessage: "Can we reschedule our call?",
-    time: "Yesterday",
-    from:"Emily Chen",
-    unread: 1,
-    pin: true,
-  },
-  {
-    id: "4",
-    name: "John smith",
-    avatar: "",
-    lastMessage: "Sounds good 👍",
-    time: "Monday",
-    from:"John smith",
-    unread: 0,
-    pin: true,
-  },
+const chatData = [
+    {
+      id: 1,
+      sender: [{id:1,name: 'Alice', avatar: ''}],
+      to: [{id:2,name: 'Bob'}],
+      message: 'Hello, Bob!',
+      timestamp: '2023-10-01T10:00:00Z',
+    },
+    {
+      id: 2,
+      sender: [{id:2,name: 'Bob', avatar: ''}],
+      to: [{id:1,name: 'Alice'}],
+      message: 'Hi, Alice! How are you?',
+      timestamp: '2023-10-01T10:05:00Z',
+    },
+    {
+      id: 3,
+      sender: [{id:1,name: 'Alice', avatar: ''}],
+      to: [{id:2,name: 'Bob'}],
+      message: "I'm good, thanks! What about you?",
+      timestamp: '2023-10-01T10:10:00Z', 
+    },
+    {
+      id: 4,
+      sender: [{id:2,name: 'Bob', avatar: ''}],
+      to: [{id:1,name: 'Alice'}],
+      message: "Doing well! Are you free for a call later?",
+      timestamp: '2023-10-01T10:15:00Z',
+    },
+    {
+      id: 5,
+      sender: [{id:1,name: 'Alice', avatar: ''}],
+      to: [{id:2,name: 'Bob'}],
+      message: 'Sure, let me know the time.',
+      timestamp: '2023-10-01T10:20:00Z',
+    },
+    {
+      id: 6,
+      sender: [{id:2,name: 'Bob', avatar: ''}],
+      to: [{id:1,name: 'Alice'}],
+      message: 'How about 3 PM?',
+      timestamp: '2023-10-01T10:25:00Z',
+    },
+    {
+      id: 7,
+      sender: [{id:1,name: 'Alice', avatar: ''}],
+      to: [{id:2,name: 'Bob'}],
+      message: "3 PM works for me. Talk to you then!",
+      timestamp: '2023-10-01T10:30:00Z',
+    },
+    {
+      id: 8,
+      sender: [{id:2,name: 'Bob', avatar: ''}],
+      to: [{id:1,name: 'Alice'}],
+      message: 'Great! See you later.',
+      timestamp: '2023-10-01T10:35:00Z',
+    },  
+    {
+      id: 9,
+      sender: [{id:1,name: 'Alice', avatar: ''}],
+      to: [{id:2,name: 'Bob'}],
+      message: 'Bye!',
+      timestamp: '2023-10-01T10:40:00Z',
+    },
+    {
+      id: 10,
+      sender: [{id:2,name: 'Bob', avatar: ''}],
+      to: [{id:1,name: 'Alice'}],
+      message: 'Take care!',
+      timestamp: '2023-10-01T10:45:00Z',
+    },
+    {
+      id: 11,
+      sender: [{id:1,name: 'Alice', avatar: ''}],
+      to: [{id:2,name: 'Bob'}],
+      message: 'You too!',
+      timestamp: '2023-10-01T10:50:00Z',
+    }
+
 ]
-
-function App() {
   
 
+function App() {
   return (
     <div className="flex">
       <SideBar />
-      <div className='gap-3 flex flex-col p-5 border-b border-gray-300 h-screen bg-gray-800 w-1/3'>
-        <div className='flex gap-2 p-2 border items-center border-gray-700 rounded-lg w-full'>
-          <input type="text" className='w-full outline-none px-3'/>
-          <SearchIcon size={20}/>
+      <ChatListsSection />
+      <div className='p-5 w-full'>
+        <nav className='flex justify-between sticky items-center border-b-[1px] border-gray-300 pb-3'>
+          <div className='flex items-center gap-3'>
+            <div className="p-2 w-10 h-10 rounded-full bg-[#6960DC] flex items-center justify-center text-white font-bold">
+              {"A"}
+            </div> 
+            <div className='text-xl font-bold'>Alice</div> 
         </div>
-        <div className='flex flex-col gap-3 overflow-y-scroll scroll-auto h-[92vh]'>
-          {
-            userChats.map((chat) => (
-                  <div key={chat.id} className='p-2 shadow-gray-700 shadow-sm flex justify-between items-center rounded-2xl '>
-            <div className='flex gap-3 justify-between items-center'>
-              <div>
-              <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-                {chat.name.charAt(0)}
-              </div>
-            </div>
-            <div className='leading-6'>
-               <h1 className='font-bold'>{chat.name}</h1>
-               <h3>{chat.from} : <span>{chat.lastMessage}</span></h3>
-            </div>
-            </div>
-            <div className='flex flex-col items-end gap-3'>
-               <div>{chat.time}</div>
-               {chat.pin && <div className='flex justify-end'><PinIcon size={16} /></div>}
-            </div>
-          </div>
-            ))   
-          }
+        <div className='flex gap-8'>
+          <Search color={"#818594"} />
+          <Phone color={"#818594"}/>
+          <Video color={"#818594"}/>
+          <UserRoundSearch color={"#818594"}/>
+          <Ellipsis color={"#818594"}/>
+        </div>
+        </nav>
+        <div className='p-5 h-[85vh] overflow-y-scroll scrollbar-custom scroll-auto'>
+            {
+              chatData.map((chat) => (
+                <div key={chat.id} className={`mb-5 flex ${chat.sender[0].name === 'Alice' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[60%] p-3 rounded-lg ${chat.sender[0].name === 'Alice' ? 'bg-[#6960DC] text-white' : 'bg-[#E6EBF5] text-black'}`}>
+                    <p>{chat.message}</p>
+                    <span className='text-xs opacity-70'>{new Date(chat.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                </div>
+              ))  
+            }
+        </div>
+        <div className='flex gap-5 items-center sticky bg-white p-3'>
+          <input type="text" placeholder="Type a message..." className='w-full p-3 outline-none bg-[#EFF2F7]'/>
+          <Smile />
+          <Paperclip />
+          <button className='bg-[#6960DC] p-3 rounded-sm'><SendHorizontal color='#ffff' /></button>
         </div>
       </div>
     </div>
