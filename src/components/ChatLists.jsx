@@ -145,12 +145,12 @@ export const userChats = [
 
 const ChatLists = () => {
   return (
-    <div>
+    <div className=''>
         <h1 className='text-2xl font-bold ml-5'>Recent</h1>
-        <div className='flex flex-col gap-3 overflow-y-scroll scrollbar-custom scroll-auto h-[88vh]'>
+        <div className='flex flex-col gap-3 overflow-y-scroll scrollbar-custom scroll-auto h-[80vh] sm:h-[85vh] lg:h-[90vh] pb-10'>
           {
             userChats.map((chat) => (
-            <div key={chat.id} className='px-7 py-2 flex justify-between items-center hover:bg-[#E6EBF5] cursor-pointer'>
+            <div key={chat.id} className='sm:px-7 px-3 py-2 flex justify-between items-center hover:bg-[#E6EBF5] cursor-pointer'>
                 <div className='flex gap-3 justify-between items-center'>
                     <div>
                         <div className="w-12 h-12 rounded-full bg-[#6960DC] flex items-center justify-center text-white font-bold">
@@ -159,12 +159,12 @@ const ChatLists = () => {
                     </div>
                     <div className='leading-6'>
                         <h1 className='font-bold'>{chat.name}</h1>
-                        <h3 className='truncate max-w-[250px]'>{chat.from} : <span>{chat.lastMessage}</span></h3>
+                        <h3 className='truncate sm:w-[50vw] lg:w-[250px] w-[60vw]'>{chat.from} : <span>{chat.lastMessage}</span></h3>
                     </div>
                 </div>
-                <div className='flex flex-col items-end gap-3 text-sm'>
+                <div className='flex flex-col items-end gap-3 text-xs'>
                 <div>{chat.time}</div>
-                {chat.pin && <div className='flex justify-end'><PinIcon size={16} /></div>}
+                {chat.pin && <div className='flex justify-end'><PinIcon size={12} /></div>}
                 </div>
             </div>
             ))   
