@@ -3,7 +3,7 @@ import NavBar from './NavBar'
 import ConversationLists from './ConversationLists'
 import InputBar from './InputBar'
 
-const ConversationSection = () => {
+const ConversationSection = ({chatId}) => {
   return (
     <div className='p-5 w-full'>
         <NavBar />
