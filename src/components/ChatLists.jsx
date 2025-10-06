@@ -4,10 +4,10 @@ import { db } from "../firebase";
 import { collection, query, onSnapshot, getDoc, doc } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 
-const ChatLists = () => {
+const ChatLists = ({onSelectChat}) => {
   const { currentUser } = useAuth();
   const [chats, setChats] = useState([]);
-
+ 
   useEffect(() => {
     if (!currentUser) return;
 
@@ -54,8 +54,10 @@ const ChatLists = () => {
             }
           }
 
+          console.log("docSnap.id",docSnap.id)
+
           return {
-            id: docSnap.id,
+            id: docSnap.id, 
             name: otherUserName,
             avatar,
             lastMessage: chat.lastMessage || "No messages yet",
@@ -67,6 +69,7 @@ const ChatLists = () => {
       );
 
       setChats(chatData);
+      console.log("chatData",chatData)
     });
 
     return () => unsubscribe();
@@ -75,10 +78,10 @@ const ChatLists = () => {
   return (
     <div>
       <h1 className="text-2xl font-bold ml-5">Recent</h1>
-      <div className="flex flex-col gap-3 overflow-y-scroll scrollbar-custom scroll-auto h-[80vh] sm:h-[85vh] lg:h-[90vh] pb-10">
+      <div className="flex flex-col gap-3 overflow-y-scroll max-h-[80vh] scrollbar-custom scroll-auto pb-10">
         {chats.map((chat) => (
           <div
-            key={chat.id}
+            key={chat.id}  onClick={() => onSelectChat(chat.id, chat.name, chat.avatar)}
             className="sm:px-7 px-3 py-2 flex justify-between items-center hover:bg-[#E6EBF5] cursor-pointer"
           >
             <div className="flex gap-3 items-center">
@@ -97,13 +100,13 @@ const ChatLists = () => {
               </div>
               <div className="leading-6">
                 <h1 className="font-bold">{chat.name}</h1>
-                <h3 className="truncate sm:w-[50vw] lg:w-[250px] w-[60vw]">
+                <h3 className="truncate sm:w-[50vw] lg:w-[250px] w-[60vw] text-xs">
                   {chat.from}: <span>{chat.lastMessage}</span>
                 </h3>
               </div>
             </div>
             <div className="flex flex-col items-end gap-3 text-xs">
-              <div>{chat.time}</div>
+              <div className="text-xs text-gray-400">{chat.time}</div>
               {chat.pin && (
                 <div className="flex justify-end">
                   <PinIcon size={12} />

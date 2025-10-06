@@ -3,7 +3,7 @@ import appLogo from '../assets/logo.svg'
 import {  Contact, MessageSquareMore,  MoonStar, Settings,  User, UserSearch } from 'lucide-react'
 const SideBar = () => {
   return (
-    <div className='sm:p-5 p-2 w-fit sm:h-screen flex sm:flex-col justify-between'>
+    <div className='sm:p-5 p-2 w-fit h-screen flex sm:flex-col justify-between'>
       <div className="flex flex-col gap-5 items-center ">
         <img src={appLogo} alt="Linkup" className="w-13"/>
       </div>
