@@ -1,22 +1,30 @@
 import React from "react";
 import { PinIcon } from "lucide-react";
 import useFriendsWithLastMessage from "../hooks/useFriendsWithLastMessage";
+import { doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { db } from "../firebase";
 import { ensureChatExists } from "../utils/ensureChatExists";
 import { useAuth } from "../context/AuthContext";
 
-const ChatLists = ({ onSelectChat }) => {
+const ChatLists = ({ onSelectChat,searchResults = [] }) => {
   const friends = useFriendsWithLastMessage();
  const { currentUser } = useAuth();
  const handleSelect = async (friend) => {
-  console.log(friend.id)
+    await updateDoc(doc(db, "users", currentUser.uid), {
+      friends: arrayUnion(friend.id),
+    });
+    await updateDoc(doc(db, "users", friend.id), {
+      friends: arrayUnion(currentUser.uid),
+    });
     const chatId = await ensureChatExists(currentUser.uid, friend.id);
     onSelectChat(chatId, friend.name, friend.avatar, friend.id);
   };
+  const listToRender = searchResults.length > 0 ? searchResults : friends;
   return (
     <div>
-      <h1 className="text-2xl font-bold ml-5">Recent</h1>
+      <h1 className="text-2xl font-bold ml-5">{searchResults.length > 0 ? "Search Results" : "Recent"}</h1>
       <div className="flex flex-col gap-3 overflow-y-scroll max-h-[80vh] scrollbar-custom scroll-auto pb-10">
-        {friends.map((friend) => (
+        {listToRender.map((friend) => (
           <div
             key={friend.id} // unique key
             onClick={() => handleSelect(friend)}

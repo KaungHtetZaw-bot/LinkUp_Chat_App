@@ -4,9 +4,7 @@ import { db } from '../firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
 
-const SearchBar = () => {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [results, setResults] = useState([])
+const SearchBar = ({ searchTerm, setSearchTerm, setSearchResults }) => {
   const { currentUser } = useAuth()
 
   const handleSearch = async (e) => {
@@ -25,7 +23,7 @@ const SearchBar = () => {
       .map((doc) => ({ id: doc.id, ...doc.data() }))
       .filter((user) => user.id !== currentUser.uid)
     console.log("search",users)
-    setResults(users)
+    setSearchResults(users)
   }
   return (
     <div className='gap-3 p-5 flex flex-col w-full'>

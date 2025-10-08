@@ -11,24 +11,30 @@ import {
 } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 
-const InputBar = ({ chatId, otherUserId }) => {
+const InputBar = ({ chatId, otherUserId,addLocalMessage }) => {
   const { currentUser } = useAuth();
   const [message, setMessage] = useState("");
 
   const sendMessage = async () => {
     if (!message.trim() || !chatId || !currentUser?.uid) return;
+    const localId = Date.now().toString();
+    const optimisticMsg = {
+      localId,
+      message,
+      from: currentUser.uid,
+      timestamp: new Date(),
+    };
+
+    addLocalMessage(optimisticMsg);
+    setMessage("");
 
     try {
       const messagesRef = collection(db, "chats", chatId, "messages");
-
-      // Add new message
       await addDoc(messagesRef, {
         message,
         from: currentUser.uid,
         timestamp: serverTimestamp(),
       });
-
-      // Ensure chat doc exists
       const chatDocRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatDocRef);
 
@@ -39,8 +45,6 @@ const InputBar = ({ chatId, otherUserId }) => {
           createdAt: serverTimestamp(),
         });
       }
-
-      // Update last message (for chat list display)
       await setDoc(
         chatDocRef,
         {
@@ -50,8 +54,6 @@ const InputBar = ({ chatId, otherUserId }) => {
         },
         { merge: true }
       );
-
-      setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
     }

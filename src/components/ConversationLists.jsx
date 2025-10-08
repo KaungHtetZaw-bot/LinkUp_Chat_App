@@ -3,7 +3,7 @@ import { collection, query, orderBy, onSnapshot, getDoc, doc } from "firebase/fi
 import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 
-const ConversationLists = ({ chatId }) => {
+const ConversationLists = ({ chatId, localMessages = [] }) => {
   const { currentUser } = useAuth();
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
@@ -11,7 +11,6 @@ const ConversationLists = ({ chatId }) => {
   useEffect(() => {
     if (!chatId || !currentUser) return;
 
-    // 🔹 Firestore: Listen to all messages in the chat
     const messagesRef = collection(db, "chats", chatId, "messages");
     const q = query(messagesRef, orderBy("timestamp", "asc"));
 
@@ -31,19 +30,13 @@ const ConversationLists = ({ chatId }) => {
               avatar = userData.avatar || "";
             }
           }
-
-          const formattedTime = msg.timestamp?.toDate
-            ? msg.timestamp.toDate().toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "";
+          const time = msg.timestamp?.toDate ? msg.timestamp.toDate() : new Date();
 
           return {
             id: docSnap.id,
             from: msg.from,
-            message: msg.message, // Make sure Firestore field is 'message'
-            timestamp: formattedTime,
+            message: msg.message,
+            timestamp: time,
             senderName,
             avatar,
           };
@@ -51,36 +44,56 @@ const ConversationLists = ({ chatId }) => {
       );
 
       setMessages(msgs);
-      console.log("msgs",msgs)
     });
 
     return () => unsubscribe();
   }, [chatId, currentUser]);
+  const combinedMessages = [
+    ...messages,
+    ...localMessages.filter((lm) => {
+      const isDuplicate = messages.some((fm) => {
+        if (fm.from !== lm.from || fm.message !== lm.message) return false;
 
-  // 🔹 Auto-scroll to bottom
+        const ft = fm.timestamp instanceof Date ? fm.timestamp.getTime() : new Date(fm.timestamp).getTime();
+        const lt = lm.timestamp instanceof Date ? lm.timestamp.getTime() : new Date(lm.timestamp).getTime();
+
+        return Math.abs(ft - lt) < 5000;
+      });
+
+      return !isDuplicate;
+    }),
+  ].sort((a, b) => a.timestamp - b.timestamp);
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [combinedMessages]);
 
   return (
     <div className="md:p-5 md:h-[85vh] h-[565px] overflow-y-scroll scrollbar-custom scroll-auto">
-      {messages.map((msg) => (
-        <div
-          key={msg.id}
-          className={`md:py-7 py-2 flex ${msg.from === currentUser.uid ? "justify-end" : "justify-start"}`}
-        >
-          <div
-            className={`max-w-[60%] p-3 rounded-lg ${
-              msg.from === currentUser.uid ? "bg-[#6960DC] text-white" : "bg-[#E6EBF5] text-black"
-            }`}
-          >
-            <p className="md:text-md text-sm">{msg.message}</p>
-            <span className="text-xs opacity-70">{msg.timestamp || new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-          </div>
-        </div>
-      ))}
+      {combinedMessages.map((msg) => {
+        const timeStr =
+          msg.timestamp instanceof Date
+            ? msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+            : "Sending...";
 
-      {/* Scroll anchor */}
+        return (
+          <div
+            key={msg.id || msg.localId}
+            className={`md:py-7 py-2 flex ${msg.from === currentUser.uid ? "justify-end" : "justify-start"}`}
+          >
+            <div
+              className={`max-w-[60%] p-3 rounded-lg ${
+                msg.from === currentUser.uid ? "bg-[#6960DC] text-white" : "bg-[#E6EBF5] text-black"
+              }`}
+            >
+              <p className="md:text-md text-sm">{msg.message}</p>
+              <span className="text-xs opacity-70 text-[10px]">{timeStr}</span>
+            </div>
+            {msg.error && (
+              <span className="text-xs text-red-400 mt-1 block">!!Failed to send</span>
+            )}
+          </div>
+        );
+      })}
       <div ref={messagesEndRef} />
     </div>
   );

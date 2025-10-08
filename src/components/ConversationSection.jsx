@@ -3,12 +3,8 @@ import NavBar from "./NavBar";
 import ConversationLists from "./ConversationLists";
 import InputBar from "./InputBar";
 
-const ConversationSection = ({ chatId, chatName, avatar, otherUserId, handleBack }) => {
-  const [directMessage,setDirectMessage]=useState('')
-  useEffect(() => {
-    console.log("conversation", otherUserId);
-  }, [chatId]);
-
+const ConversationSection = ({ chatId, chatName, avatar,otherUserId, handleBack }) => {
+const [localMessages, setLocalMessages] = useState([]);
   return (
     <div className="px-5 py-2 w-full h-screen flex flex-col">
       {window.innerWidth < 640 && handleBack && (
@@ -18,9 +14,15 @@ const ConversationSection = ({ chatId, chatName, avatar, otherUserId, handleBack
       )}
       <NavBar chatName={chatName} avatar={avatar} className="flex-start" />
       <div className="flex-1 overflow-y-scroll">
-        <ConversationLists chatId={chatId} otherUserId={otherUserId} fsMessage={directMessage} />
+        <ConversationLists chatId={chatId} otherUserId={otherUserId} localMessages={localMessages} />
       </div>
-      <InputBar chatId={chatId} otherUserId={otherUserId} onMessage={setDirectMessage} className="flex-end" />
+      <InputBar chatId={chatId} otherUserId={otherUserId} addLocalMessage={(msgOrUpdater) =>
+          setLocalMessages((prev) =>
+            typeof msgOrUpdater === "function"
+              ? msgOrUpdater(prev)
+              : [...prev, msgOrUpdater]
+          )
+        } className="flex-end" />
     </div>
   );
 };
