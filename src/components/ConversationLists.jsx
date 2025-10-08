@@ -20,7 +20,6 @@ const ConversationLists = ({ chatId }) => {
         snapshot.docs.map(async (docSnap) => {
           const msg = docSnap.data();
 
-          // Get sender info
           let senderName = "Unknown";
           let avatar = "";
 
@@ -33,7 +32,6 @@ const ConversationLists = ({ chatId }) => {
             }
           }
 
-          // Format timestamp
           const formattedTime = msg.timestamp?.toDate
             ? msg.timestamp.toDate().toLocaleTimeString([], {
                 hour: "2-digit",
@@ -65,19 +63,19 @@ const ConversationLists = ({ chatId }) => {
   }, [messages]);
 
   return (
-    <div className="p-5 h-[85vh] overflow-y-scroll scrollbar-custom scroll-auto">
+    <div className="md:p-5 md:h-[85vh] h-[565px] overflow-y-scroll scrollbar-custom scroll-auto">
       {messages.map((msg) => (
         <div
           key={msg.id}
-          className={`py-7 flex ${msg.from === currentUser.uid ? "justify-end" : "justify-start"}`}
+          className={`md:py-7 py-2 flex ${msg.from === currentUser.uid ? "justify-end" : "justify-start"}`}
         >
           <div
             className={`max-w-[60%] p-3 rounded-lg ${
               msg.from === currentUser.uid ? "bg-[#6960DC] text-white" : "bg-[#E6EBF5] text-black"
             }`}
           >
-            <p>{msg.message}</p>
-            <span className="text-xs opacity-70">{msg.timestamp}</span>
+            <p className="md:text-md text-sm">{msg.message}</p>
+            <span className="text-xs opacity-70">{msg.timestamp || new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
           </div>
         </div>
       ))}

@@ -5,11 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 const LoginPage = () => {
+  const brandPurple = "#6960DC";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { currentUser } = useAuth(); // access logged-in user
+  const { currentUser } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -32,55 +33,71 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "#f5f4ff" }}>
       <div className="w-full max-w-md bg-white shadow-md rounded-2xl p-8">
-        <h1 className="text-2xl font-bold text-center mb-2">Connect Your Friends !!</h1>
-        <h2 className="text-lg text-gray-600 text-center mb-6">Log in to start chatting</h2>
+        {/* Header */}
+        <h1 className="text-2xl font-bold text-center mb-2" style={{ color: brandPurple }}>
+          Connect Your Friends
+        </h1>
+        <h2 className="text-lg text-gray-600 text-center mb-6">
+          Log in to start chatting with your friends
+        </h2>
 
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-
+        {/* Form */}
         <form className="space-y-4" onSubmit={handleLogin}>
+          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
             <input
+              id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2"
+              style={{ borderColor: brandPurple, outlineColor: brandPurple }}
               placeholder="Enter your email"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2"
+              style={{ borderColor: brandPurple, outlineColor: brandPurple }}
               placeholder="Enter your password"
               required
             />
           </div>
 
+          {/* Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+            className="w-full py-2 rounded-lg font-semibold text-white shadow-md focus:outline-none focus:ring-2"
+            style={{ backgroundColor: brandPurple }}
           >
             Log In
           </button>
         </form>
 
+        {/* Footer */}
         <p className="text-center text-sm text-gray-600 mt-4">
           Don’t have an account?{" "}
-          <a href="/register" className="text-blue-600 hover:underline">
+          <a href="/register" className="font-medium" style={{ color: brandPurple }}>
             Register
           </a>
         </p>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage

@@ -1,52 +1,91 @@
-import { Paperclip, SendHorizontal, Smile } from 'lucide-react'
-import React, { useState } from 'react'
-import { db } from '../firebase'
-import { collection, addDoc, doc, setDoc } from 'firebase/firestore'
-import { useAuth } from '../context/AuthContext'
+import { Paperclip, SendHorizontal, Smile } from "lucide-react";
+import React, { useState } from "react";
+import { db } from "../firebase";
+import {
+  collection,
+  addDoc,
+  doc,
+  setDoc,
+  serverTimestamp,
+  getDoc,
+} from "firebase/firestore";
+import { useAuth } from "../context/AuthContext";
 
-const InputBar = ({ chatId }) => {
-  const { currentUser } = useAuth()
-  const [message, setMessage] = useState('')
+const InputBar = ({ chatId, otherUserId }) => {
+  const { currentUser } = useAuth();
+  const [message, setMessage] = useState("");
 
   const sendMessage = async () => {
-    if (!message.trim() || !chatId) return;
+    if (!message.trim() || !chatId || !currentUser?.uid) return;
 
-    const messagesRef = collection(db, "chats", chatId, "messages")
-    const timestamp = new Date()
+    try {
+      const messagesRef = collection(db, "chats", chatId, "messages");
 
-    await addDoc(messagesRef, {
-      message,
-      from: currentUser.uid,
-      timestamp
-    })
+      // Add new message
+      await addDoc(messagesRef, {
+        message,
+        from: currentUser.uid,
+        timestamp: serverTimestamp(),
+      });
 
-    const chatDocRef = doc(db, "chats", chatId)
-    await setDoc(chatDocRef, { lastMessage: message, time: timestamp }, { merge: true })
+      // Ensure chat doc exists
+      const chatDocRef = doc(db, "chats", chatId);
+      const chatSnap = await getDoc(chatDocRef);
 
-    setMessage("")
-  }
+      if (!chatSnap.exists()) {
+        await setDoc(chatDocRef, {
+          users: [currentUser.uid, otherUserId],
+          pin: false,
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      // Update last message (for chat list display)
+      await setDoc(
+        chatDocRef,
+        {
+          lastMessage: message,
+          from: currentUser.uid,
+          time: serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      setMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") sendMessage()
-  }
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
 
   return (
-    <div className='flex gap-5 items-center sticky bg-white p-3'>
-        <input
-          type="text"
-          placeholder="Type a message..."
-          value={message}
-          onChange={e => setMessage(e.target.value)}
-          onKeyDown={handleKeyPress}
-          className='w-full p-3 outline-none bg-[#EFF2F7]'
-        />
-        <Smile />
-        <Paperclip />
-        <button className='bg-[#6960DC] p-3 rounded-sm' onClick={sendMessage}>
-          <SendHorizontal color='#ffff' />
-        </button>
-    </div>
-  )
-}
+    <div className="flex items-center gap-4 bg-white border-t border-gray-200 md:px-4 md:py-3 px-2 py-1">
+      <Smile className="cursor-pointer text-gray-500" />
+      <Paperclip className="cursor-pointer text-gray-500" />
 
-export default InputBar
+      <input
+        type="text"
+        placeholder="Type a message..."
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        onKeyDown={handleKeyPress}
+        className="flex-1 bg-[#EFF2F7] rounded-lg md:p-3 p-2 outline-none text-sm"
+      />
+
+      <button
+        onClick={sendMessage}
+        className="bg-[#6960DC] hover:bg-[#5a52c7] md:p-3 p-2 rounded-lg transition-all"
+      >
+        <SendHorizontal color="#fff" className="w-5 h-5"/>
+      </button>
+    </div>
+  );
+};
+
+export default InputBar;

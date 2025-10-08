@@ -4,6 +4,7 @@ import LoginPage from "./Pages/AuthPages/LoginPage";
 import RegisterPage from "./Pages/AuthPages/RegisterPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
+import ChatRoom from "./components/ChatRoom";
 
 function App() {
   return (
@@ -15,6 +16,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <HomePage />
+                
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chatroom"
+            element={
+              <ProtectedRoute>
+                <ChatRoom/>
               </ProtectedRoute>
             }
           />

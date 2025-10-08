@@ -1,31 +1,27 @@
-// RegisterPage.jsx
 import React, { useState } from "react";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../../firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
-  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError("");
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
-      await updateProfile(userCredential.user, { displayName });
-
+      await userCredential.user.updateProfile({ displayName: username });
+      await setDoc(doc(db, "users", user.uid), {
+        name: displayName,
+        email: user.email,
+        avatar: "",
+        isOnline: true,
+        lastSeen: serverTimestamp(),
+      });
       navigate("/");
     } catch (err) {
       setError(err.message);
@@ -33,46 +29,52 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-2xl font-bold mb-4">Create Your Account</h1>
-      {error && <p className="text-red-600 mb-2">{error}</p>}
-      <form onSubmit={handleRegister} className="flex flex-col space-y-4 bg-white p-6 rounded-lg shadow-md w-80">
-        <input
-          type="text"
-          placeholder="Display Name"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          className="border rounded px-3 py-2 focus:outline-none"
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="border rounded px-3 py-2 focus:outline-none"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="border rounded px-3 py-2 focus:outline-none"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="border rounded px-3 py-2 focus:outline-none"
-          required
-        />
-        <button type="submit" className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-          Register
-        </button>
-      </form>
+    <div className="flex flex-col items-center justify-center min-h-screen" style={{ backgroundColor: "#f5f4ff" }}>
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+        <h1 className="text-3xl font-extrabold text-center mb-4" style={{ color: "#6960DC" }}>
+          Connect Your Friends 💜
+        </h1>
+
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+
+        <form onSubmit={handleRegister} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+            style={{ borderColor: "#6960DC" }}
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+            style={{ borderColor: "#6960DC" }}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+            style={{ borderColor: "#6960DC" }}
+          />
+          <button
+            type="submit"
+            className="w-full py-2 rounded-lg font-semibold text-white"
+            style={{ backgroundColor: "#6960DC" }}
+          >
+            Sign Up
+          </button>
+        </form>
+
+        <p className="mt-4 text-center text-sm text-gray-600">
+          Already have an account? <a href="/login" className="text-purple-600">Log In</a>
+        </p>
+      </div>
     </div>
   );
 };

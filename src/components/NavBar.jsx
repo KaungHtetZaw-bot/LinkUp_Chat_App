@@ -12,18 +12,18 @@ const NavBar = ({chatName,avatar}) => {
             className="p-2 w-10 h-10 rounded-full object-cover"
           />
         ) : (
-          <div className="p-2 w-10 h-10 rounded-full bg-[#6960DC] flex items-center justify-center text-white font-bold">
+          <div className="p-2 md:w-10 md:h-10 w-7 h-7 rounded-full bg-[#6960DC] flex items-center justify-center text-white font-bold">
             {chatName.charAt(0)}
           </div>
         )}
-            <div className='text-xl font-bold'>{chatName}</div> 
+            <div className='md:text-xl text-sm font-bold'>{chatName}</div> 
         </div>
-        <div className='flex gap-8'>
-            <Search color={"#818594"} />
-            <Phone color={"#818594"}/>
-            <Video color={"#818594"}/>
-            <UserRoundSearch color={"#818594"}/>
-            <Ellipsis color={"#818594"}/>
+        <div className='flex md:gap-8 gap-2'>
+            <Search color={"#818594"} className='w-5 h-5'/>
+            <Phone color={"#818594"} className='w-5 h-5'/>
+            <Video color={"#818594"}className='w-5 h-5'/>
+            <UserRoundSearch color={"#818594"} className='w-5 h-5'/>
+            <Ellipsis color={"#818594"} className='w-5 h-5'/>
         </div>
     </nav>
   )
