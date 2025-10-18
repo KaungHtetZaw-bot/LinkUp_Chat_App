@@ -4,13 +4,39 @@ import { db } from "../firebase";
 import { doc, getDoc, onSnapshot, setDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 
+const LOCAL_KEY_PREFIX = "friends_cache_";
+
 const useFriendsWithLastMessage = () => {
   const { currentUser } = useAuth();
   const [friends, setFriends] = useState([]);
 
   useEffect(() => {
     if (!currentUser?.uid) return;
+    const cacheKey = `${LOCAL_KEY_PREFIX}${currentUser.uid}`;
 
+    // 1) Load cached friends (if any) and normalize lastMessageTime to a number (ms)
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        const normalized = parsed.map((f) => {
+          // convert possible string timestamp to ms
+          let lm = f.lastMessageTime;
+          if (typeof lm === "string") {
+            const parsedMs = Date.parse(lm);
+            lm = isNaN(parsedMs) ? null : parsedMs;
+          } else if (typeof lm !== "number") {
+            lm = null;
+          }
+          return { ...f, lastMessageTime: lm };
+        });
+        setFriends(normalized);
+      } catch (e) {
+        console.warn("Failed to parse friends cache:", e);
+      }
+    }
+
+    // 2) Start listening to Firestore and overwrite/merge live updates
     const userRef = doc(db, "users", currentUser.uid);
     let chatUnsubs = [];
 
@@ -19,7 +45,7 @@ const useFriendsWithLastMessage = () => {
       const userData = userSnap.data();
       const friendIds = userData.friends || [];
 
-      // Clean up previous listeners
+      // clean previous chat listeners
       chatUnsubs.forEach((u) => u());
       chatUnsubs = [];
 
@@ -45,18 +71,17 @@ const useFriendsWithLastMessage = () => {
           });
         }
 
-        // Listen to chat updates
+        // Listen for chat updates
         const unsubChat = onSnapshot(chatRef, (chatSnap) => {
           const chatData = chatSnap.exists() ? chatSnap.data() : {};
           const lastMessage = chatData.lastMessage || "";
-          const lastMessageTime = chatData.time?.toDate
-            ? chatData.time.toDate()
-            : null;
-          const lastMessageFormatted = lastMessageTime
-            ? lastMessageTime.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
+
+          // normalize time => number (ms)
+          const lastMessageTimeDate = chatData.time?.toDate ? chatData.time.toDate() : null;
+          const lastMessageTimeMs = lastMessageTimeDate ? lastMessageTimeDate.getTime() : null;
+
+          const lastMessageFormatted = lastMessageTimeDate
+            ? lastMessageTimeDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
             : "";
 
           setFriends((prev) => {
@@ -66,15 +91,22 @@ const useFriendsWithLastMessage = () => {
               avatar: fData.avatar || "",
               isOnline: fData.isOnline || false,
               lastMessage,
-              lastMessageTime,
+              lastMessageTime: lastMessageTimeMs, // number | null
               lastMessageFormatted,
+              pin: chatData.pin || false,
             };
-            const exists = prev.find((f) => f.id === fid);
-            if (exists) {
-              return prev.map((f) => (f.id === fid ? updated : f));
-            } else {
-              return [...prev, updated];
+
+            const exists = prev.find((p) => p.id === fid);
+            const newFriends = exists ? prev.map((p) => (p.id === fid ? updated : p)) : [...prev, updated];
+
+            // cache to localStorage (numbers are safe)
+            try {
+              localStorage.setItem(cacheKey, JSON.stringify(newFriends));
+            } catch (e) {
+              console.warn("Failed to cache friends:", e);
             }
+
+            return newFriends;
           });
         });
 
@@ -90,10 +122,10 @@ const useFriendsWithLastMessage = () => {
     };
   }, [currentUser]);
 
-  // Sort friends by last message timestamp (newest first)
+  // Sort by numeric timestamp safely (newest first)
   return friends
     .slice()
-    .sort((a, b) => (b.lastMessageTime?.getTime() || 0) - (a.lastMessageTime?.getTime() || 0));
+    .sort((a, b) => (b.lastMessageTime || 0) - (a.lastMessageTime || 0));
 };
 
 export default useFriendsWithLastMessage;

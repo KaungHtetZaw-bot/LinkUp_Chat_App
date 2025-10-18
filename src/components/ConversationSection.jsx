@@ -6,13 +6,8 @@ import InputBar from "./InputBar";
 const ConversationSection = ({ chatId, chatName, avatar,otherUserId, handleBack }) => {
 const [localMessages, setLocalMessages] = useState([]);
   return (
-    <div className="px-5 py-2 w-full h-screen flex flex-col">
-      {window.innerWidth < 640 && handleBack && (
-        <button className="p-2 mb-2 bg-gray-100 rounded" onClick={handleBack}>
-          ← Back
-        </button>
-      )}
-      <NavBar chatName={chatName} avatar={avatar} className="flex-start" />
+    <div className="md:px-5 md:py-2 p-2 w-full h-screen flex flex-col">
+      <NavBar chatName={chatName} avatar={avatar} handleBack={handleBack} className="flex-start" />
       <div className="flex-1 overflow-y-scroll">
         <ConversationLists chatId={chatId} otherUserId={otherUserId} localMessages={localMessages} />
       </div>

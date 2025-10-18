@@ -26,11 +26,11 @@ const SearchBar = ({ searchTerm, setSearchTerm, setSearchResults }) => {
     setSearchResults(users)
   }
   return (
-    <div className='gap-3 p-5 flex flex-col w-full'>
+    <div className='gap-3 md:p-5 p-2 flex flex-col w-full'>
       <h1 className='text-2xl font-bold'>Chats</h1>
         <form
         onSubmit={handleSearch}
-        className='flex gap-2 p-3 items-center bg-[#E6EBF5] w-full'
+        className='flex gap-2 md:p-3 p-1 items-center bg-[#E6EBF5] w-full'
       >
         <input
           type='text'
